@@ -19,8 +19,13 @@ public class soundGen {
 		int m = Integer.parseInt(args[1]);
 		// Open the wav file specified as the first argument
 		WavFile wavFile = WavFile.openWavFile(new File(args[2]));
+		//min value
+		int min = 0;
+		//max value
+		int max = 0;
+		//sample rate
 		int sampleRate = (int) wavFile.getSampleRate();
-
+		int noErrors = 0;
 		//the hashmap
 		HashMap<soundBuffer, Markov> hm = new HashMap<soundBuffer, Markov>();
 
@@ -37,6 +42,7 @@ public class soundGen {
 		
 		int length = (int) wavFile.getNumFrames();
 		//int length = 4410000;
+		System.out.println("Length: " + length);
 		
 		//create audio buffer
 		soundBuffer buffer = new soundBuffer(length);
@@ -46,34 +52,32 @@ public class soundGen {
 		wavFile.readFrames(tempBuf, length);
 
 		System.out.println("reading file");
+		int inMin = 0;
+		int inMax = 0;
 		for(int i = 0; i < length; i++){
 			//copy frames from temp into buffer object 
 			buffer.set(i, tempBuf[i]);
+			if(tempBuf[i] < inMin) inMin = tempBuf[i];
+			if(tempBuf[i] > inMax) inMax = tempBuf[i];
 		}
+		System.out.println("inMin: " + inMin);
+		System.out.println("inMax: " + inMax);
 		
-		/**
+		
 		//min max test
-		System.out.println(buffer.toString());
-		int max = 0;
-		int min = 0;
+		//System.out.println(buffer.toString());
 		//get max and min just to test
-		for(int s = 0; s < length){
-			//			System.out.print(s);
+		for(int s = 0; s < length; s++){
 			if(s<min){
 				min = s;
 			}
 			if(s>max){
 				max = s;
 			}
-			//for each sample in the buffer
 		}
-		System.out.println();
-		System.out.println(max);
-		System.out.println(min);
-		*/
 		
 		//add to hash map
-		System.out.println("constructing model");
+		System.out.println("Constructing Model");
 		for(int i = 0; i<length-k+1; i++) {
 			//System.out.print("2");
 			//word is int[] of size k
@@ -83,6 +87,12 @@ public class soundGen {
 				//System.out.println(x.toString());
 			}
 			//System.out.println(s);
+			
+			//OKAY SO THIS IS A PROBLEM:
+			//THIS STUFF UP HERE IS USING THE FLEX EQUALS 
+			//TO ACTUALLY MAKE THE HASHMAP
+			//NOT WHAT WE WANT 
+			
 			if(hm.containsKey(x)) {
 				try {
 					hm.get(x).add(buffer.get(i+k));
@@ -108,8 +118,9 @@ public class soundGen {
 		//System.out.println(hm.size());
 		//System.out.print(buffer.toString());
 
-		//now reconstruct sound and spit it out 
-		System.out.println("reconstruction");
+		// now reconstruct sound and spit it out //
+		
+		System.out.println("Reconstruction");
 		soundBuffer outputBuffer = new soundBuffer(m+1);
 		soundBuffer sub = new soundBuffer(k);
 		Markov prev = null;
@@ -124,12 +135,12 @@ public class soundGen {
 			}
 			Markov temp = hm.get(sub);
 			if(temp != null) {
+				//maybe this random should occur within a range as well?
 				outputBuffer.set(j+k, temp.random());
 				prev = temp;
 				//System.out.println("not null");
 			} else {
-				//System.out.println("null");
-  				
+				noErrors++;
 				//What happens when we construct a buffer that 
 				//doesn't exist in the model?
 				
@@ -167,6 +178,7 @@ public class soundGen {
 		}
 		System.out.println("outMin: "+outMin);
 		System.out.println("outMax: "+outMax);
+		System.out.println("Number of Errors: " + noErrors);
 		outputFile.writeFrames(tempBuf, m);
 		outputFile.close();
 

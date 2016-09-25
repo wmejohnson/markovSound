@@ -63,26 +63,32 @@ public class soundBuffer implements Comparable<soundBuffer>{
 		soundBuffer sb = (soundBuffer) o;
 		if(this.size != sb.size){
 			//System.out.println("not size");
+			System.out.println("size error");
+
 			return false;
 		}
 		//string equals
 //		for(int i = 0; i < this.size; i++){
 //			if(this.get(i) != sb.get(i)){
-//				//System.out.println(this.toString()+sb.toString()+"not value");
+//				System.out.println(this.toString()+sb.toString()+"not value");
 //				return false;
 //			}
 //		}
-		//flex equals
+//		
+		// flex equals //
+		//this allows two soundbuffers to be equal to each other within a certain amount of deviation 
+		
 		for(int i = 0; i < this.size; i++){
 			int temp = Math.abs(this.get(i) - sb.get(i));
-			if(temp > 25){
+			if(temp > 10000){
 				//System.out.println(this.toString()+sb.toString()+"not value");
+				System.out.println("range error");
+
 				return false;
 			}
 		}
 		//System.out.println("true");
 		return true;
-		
 	}
 	
 	@Override
