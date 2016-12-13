@@ -1,6 +1,6 @@
-### markovSound
+## markovSound
 
-## Currently in Development 
+### Currently in Development 
 
 What I'm working on is a markov model for sound creation. Unlike previous models which were interested in notes and midi genereation, this works by looking at the actual samples in the audio file.  
 
